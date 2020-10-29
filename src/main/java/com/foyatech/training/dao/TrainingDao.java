@@ -36,9 +36,9 @@ public class TrainingDao {
 		log.info(">>>>> find FY_TB_FILE_CNTRL <<<<<");
 		try {
 			List<Fy_tb_file_cntrl> resultList = jdbcTemplate.query(" SELECT * " 
-																	+ " FROM FY_TB_FILE_CNTRL " 
-																	+ " WHERE FILE_TYPE = '" + fileType 
-																	+ "' AND STATUS = 'I' ", BeanPropertyRowMapper.newInstance(Fy_tb_file_cntrl.class));
+										+ " FROM FY_TB_FILE_CNTRL " 
+										+ " WHERE FILE_TYPE = '" + fileType 
+										+ "' AND STATUS = 'I' ", BeanPropertyRowMapper.newInstance(Fy_tb_file_cntrl.class));
 			
 			log.info("Load " + resultList.size() + " recood(s) FROM FY_TB_FILE_CNTRL");
 			
@@ -61,9 +61,9 @@ public class TrainingDao {
 		int actual = 0;
 		
 		String sql = "UPDATE FY_TB_FILE_CNTRL " 
-					+ "SET STATUS = ? , START_TIME = ? " 
-					+ "WHERE FILE_SEQ = ? "
-					+ "AND STATUS = 'I' " ;
+				 "SET STATUS = ? , START_TIME = ? " 
+				 "WHERE FILE_SEQ = ? "
+				 "AND STATUS = 'I' " ;
 		
 		actual = jdbcTemplate.update(sql, "W", LocalDateTime.now(), fileSeq);
 		
@@ -82,8 +82,8 @@ public class TrainingDao {
 		log.info(">>>>> Insert FY_TB_TRANSACTION <<<<<");
 		
 		String sql = "INSERT INTO FY_TB_TRANSACTION (FILE_SEQ, FILE_TYPE, FILENAME, TRANSACTION_TYPE, TRANSACTION_SEQ, TRANSACTION_TIME, "
-												+ "CUST_ID, STORE_ID, PRODUCT_ID, PHONE, ADDRESS, MEMO, PRICE, UNIT, AMOUNT) "
-												+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+				+ "CUST_ID, STORE_ID, PRODUCT_ID, PHONE, ADDRESS, MEMO, PRICE, UNIT, AMOUNT) "
+				+ "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 		
 		jdbcTemplate.update(sql, transaction.getFileSeq(),
 								transaction.getFileType(),
@@ -111,9 +111,9 @@ public class TrainingDao {
 		log.info(">>>>> Insert FY_TB_FILE_INFO <<<<<");
 		
 		String prepareData = "SELECT FILE_SEQ, FILE_TYPE, FILENAME, TRANSACTION_TYPE, SUM(AMOUNT) AMOUNT, COUNT(TRANSACTION_TYPE) COUNT "
-							  + "FROM FY_TB_TRANSACTION "
-							  + "WHERE FILE_TYPE = '" + fileType + "' AND FILENAME = '" + fileName + "' "
-							  + "GROUP BY TRANSACTION_TYPE, FILE_SEQ, FILE_TYPE, FILENAME ";
+					+ "FROM FY_TB_TRANSACTION "
+					+ "WHERE FILE_TYPE = '" + fileType + "' AND FILENAME = '" + fileName + "' "
+					+ "GROUP BY TRANSACTION_TYPE, FILE_SEQ, FILE_TYPE, FILENAME ";
 		
 		List<Fy_tb_file_info> resultList = jdbcTemplate.query(prepareData, BeanPropertyRowMapper.newInstance(Fy_tb_file_info.class));
 		
@@ -153,7 +153,7 @@ public class TrainingDao {
 		Integer fileSeq = Integer.parseInt(resultMap.get("NEXTVAL").toString());
 		
 		String sql = "INSERT INTO FY_TB_FILE_CNTRL (FILE_SEQ, FILE_TYPE, FILENAME, STATUS) "
-					+ "VALUES (?,?,?,?)";
+				 "VALUES (?,?,?,?)";
 		
 		jdbcTemplate.update(sql, fileSeq, outputType, fileName, "I");
 	}
@@ -167,12 +167,12 @@ public class TrainingDao {
 		log.info(">>>>> Update FY_TB_FILE_CNTRL <<<<<");
 		
 		String prepareData = " SELECT FILE_SEQ, FILE_TYPE, FILENAME, SUM(AMOUNT) totalAmount, SUM(COUNT) totalCount, minTransactionTime, maxTransactionTime "
-							+ " FROM FY_TB_FILE_INFO, "
-							+ " 	(SELECT MIN(TRANSACTION_TIME) minTransactionTime, MAX(TRANSACTION_TIME) maxTransactionTime "
-							+ "		 FROM FY_TB_TRANSACTION "
-							+ " 	 WHERE FILENAME = '" + fileName + "') "
-							+ " WHERE FILENAME = '" + fileName + "' "
-							+ " GROUP BY FILE_SEQ, FILE_TYPE, FILENAME, minTransactionTime, maxTransactionTime ";
+					+ " FROM FY_TB_FILE_INFO, "
+					+ " 	(SELECT MIN(TRANSACTION_TIME) minTransactionTime, MAX(TRANSACTION_TIME) maxTransactionTime "
+					+ "		 FROM FY_TB_TRANSACTION "
+					+ " 	 WHERE FILENAME = '" + fileName + "') "
+					+ " WHERE FILENAME = '" + fileName + "' "
+					+ " GROUP BY FILE_SEQ, FILE_TYPE, FILENAME, minTransactionTime, maxTransactionTime ";
 		
 		List<Fy_tb_file_cntrl> resultList = jdbcTemplate.query(prepareData, BeanPropertyRowMapper.newInstance(Fy_tb_file_cntrl.class));
 		
@@ -181,12 +181,12 @@ public class TrainingDao {
 					+ "WHERE FILE_SEQ = ? ";
 
 		jdbcTemplate.update(sql, "S", LocalDateTime.now(), resultList.get(0).getTotalCount(),
-															resultList.get(0).getTotalAmount(),
-															resultList.get(0).getMinTransactionTime(),
-															resultList.get(0).getMaxTransactionTime(),
-															null,
-															errorCount,
-															fileSeq);
+									resultList.get(0).getTotalAmount(),
+									resultList.get(0).getMinTransactionTime(),
+									resultList.get(0).getMaxTransactionTime(),
+									null,
+									errorCount,
+									fileSeq);
 	}
 	
 	/*
@@ -197,9 +197,9 @@ public class TrainingDao {
 		log.info(">>>>> Update FY_TB_FILE_CNTRL ERROR<<<<<");
 		
 		String sql = "UPDATE FY_TB_FILE_CNTRL " 
-					+ "SET STATUS = 'E', END_TIME = ?, DSCR = ? " 
-					+ "WHERE FILE_SEQ = ? "
-					+ "AND STATUS = 'W' " ;
+				 "SET STATUS = 'E', END_TIME = ?, DSCR = ? " 
+				 "WHERE FILE_SEQ = ? "
+				 "AND STATUS = 'W' " ;
 	
 		jdbcTemplate.update(sql, LocalDateTime.now(), dscr, fileSeq);
 	}

@@ -15,5 +15,6 @@
 6. insert DB 產出正確檔的 fileName 及 output_file_type
 7. update DB 狀態為 S
 8. 執行下一筆
+
 若過程中出現 exception 則 rollback 所有資料以及將狀態改為 E 並填寫錯誤原因
 END

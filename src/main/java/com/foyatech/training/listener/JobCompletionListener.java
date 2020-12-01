@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
@@ -15,11 +16,16 @@ import org.dom4j.io.SAXReader;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
+import org.springframework.boot.ApplicationArguments;
 
+import com.foyatech.training.dao.TrainingDao;
+import com.foyatech.training.model.Fy_tb_file_cntrl;
 import com.foyatech.training.model.XmlByInputColumn;
 import com.foyatech.training.model.XmlByInputType;
 import com.foyatech.training.model.XmlByOutputColumn;
 import com.foyatech.training.model.XmlByOutputType;
+import com.foyatech.training.model.XmlByTableColumn;
+import com.foyatech.training.model.XmlByTableName;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -28,13 +34,17 @@ public class JobCompletionListener extends JobExecutionListenerSupport {
 
 	XmlByInputType xmlByInputType = new XmlByInputType();
 	XmlByOutputType xmlByOutputType = new XmlByOutputType();
-
+	XmlByTableName xmlByTableName = new XmlByTableName();
+	
 	String cofingFile;
 	String fileType;
-
-	public JobCompletionListener(String configFile, String fileType) {
+	ApplicationArguments shellInput;
+	TrainingDao trainingDao;
+	
+	public JobCompletionListener(String configFile, String fileType, TrainingDao trainingDao) {
 		this.cofingFile = configFile;
 		this.fileType = fileType;
+		this.trainingDao = trainingDao;
 	}
 
 	@Override
@@ -42,11 +52,26 @@ public class JobCompletionListener extends JobExecutionListenerSupport {
 		if (jobExecution.getStatus() == BatchStatus.STARTED) {
 			log.info("BATCH JOB STARTED SUCCESSFULLY");
 
+			List<Fy_tb_file_cntrl> resultList = null;
+			
+			try {
+				resultList = trainingDao.findPendingData(fileType);			
+			} catch (Exception e) {
+				log.error(ExceptionUtils.getStackTrace(e));
+			}
+
+			if(resultList.size() == 0) {
+				log.info("No data in cntrl table.");
+				log.info("Training2Application end.");
+				System.exit(0);
+			}
+			
 			// 讀XML設定檔
 			String xml_inputType = "";
 			String xml_inputDelimiter = "";
 			String xml_outputType = "";
 			String xml_outputDelimiter = "";
+			String xml_tableName = "";
 			
 			SAXReader reader = new SAXReader();
 			File file = new File(cofingFile);
@@ -123,11 +148,39 @@ public class JobCompletionListener extends JobExecutionListenerSupport {
 
 				xmlByOutputType.setOutputType(xml_outputType);
 				xmlByOutputType.setCloumn(xmlByOutputColumnList);
+				
+				// 讀設定檔欄位資訊 table
+				xml_tableName = root.element("table").attributeValue("name");
+				
+				List<Element> listTableElement = root.element("table").elements();
+				
+				List<XmlByTableColumn> xmlByTableColumnList = new ArrayList<>();
+				
+				for (Element e1 : listTableElement) {
+					
+					XmlByTableColumn xmlByTableColumn = new XmlByTableColumn();
+					
+					Attribute nameAttribute = e1.attribute("name");
+					String name = nameAttribute.getValue();
+					xmlByTableColumn.setName(name);
+					Attribute typeAttribute = e1.attribute("type");
+					String type = typeAttribute.getValue();
+					xmlByTableColumn.setType(type);
+					Attribute valueAttribute = e1.attribute("value");
+					String value = valueAttribute.getValue();
+					xmlByTableColumn.setValue(value);
+					
+					xmlByTableColumnList.add(xmlByTableColumn);
+				}
+				
+				xmlByTableName.setTableName(xml_tableName);
+				xmlByTableName.setColumn(xmlByTableColumnList);
 
 				// 讀FY_TB_TRANSACTION的設定
 
 				jobExecution.getExecutionContext().put("xmlByInputType", xmlByInputType);
 				jobExecution.getExecutionContext().put("xmlByOutputType", xmlByOutputType);
+				jobExecution.getExecutionContext().put("xmlByTableName", xmlByTableName);
 			}
 			
 			if(fileType.equals("FIX")) {
@@ -191,11 +244,36 @@ public class JobCompletionListener extends JobExecutionListenerSupport {
 				xmlByOutputType.setDelimiter(xml_outputDelimiter);
 				xmlByOutputType.setCloumn(xmlByOutputColumnList);
 
-				// 讀FY_TB_TRANSACTION的設定
-
+				// 讀設定檔欄位資訊 table
+				xml_tableName = root.element("table").attributeValue("name");
+				
+				List<Element> listTableElement = root.element("table").elements();
+				
+				List<XmlByTableColumn> xmlByTableColumnList = new ArrayList<>();
+				
+				for (Element e1 : listTableElement) {
+					
+					XmlByTableColumn xmlByTableColumn = new XmlByTableColumn();
+					
+					Attribute nameAttribute = e1.attribute("name");
+					String name = nameAttribute.getValue();
+					xmlByTableColumn.setName(name);
+					Attribute typeAttribute = e1.attribute("type");
+					String type = typeAttribute.getValue();
+					xmlByTableColumn.setType(type);
+					Attribute valueAttribute = e1.attribute("value");
+					String value = valueAttribute.getValue();
+					xmlByTableColumn.setValue(value);
+					
+					xmlByTableColumnList.add(xmlByTableColumn);
+				}
+				
+				xmlByTableName.setTableName(xml_tableName);
+				xmlByTableName.setColumn(xmlByTableColumnList);
+				
 				jobExecution.getExecutionContext().put("xmlByInputType", xmlByInputType);
 				jobExecution.getExecutionContext().put("xmlByOutputType", xmlByOutputType);
-			
+				jobExecution.getExecutionContext().put("xmlByTableName", xmlByTableName);
 			}
 		}
 	}

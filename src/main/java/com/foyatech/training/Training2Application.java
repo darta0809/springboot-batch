@@ -27,7 +27,7 @@ public class Training2Application {
 		SpringApplication.run(Training2Application.class, args);
 	}
 
-//	@Scheduled(cron = "0 */1 * * * ?") // 每一分鐘執行一次
+	// 每一分鐘執行一次
 	@Scheduled(fixedDelayString = "${fixedDelayString.expression}")
 	public void perform() throws Exception {
 		JobParameters params = new JobParametersBuilder()

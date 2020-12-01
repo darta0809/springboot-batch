@@ -1,10 +1,8 @@
 package com.foyatech.training.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Set;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.DefaultBatchConfigurer;
@@ -25,9 +23,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import com.foyatech.training.dao.TrainingDao;
 import com.foyatech.training.listener.JobCompletionListener;
-import com.foyatech.training.model.Fy_tb_file_cntrl;
-import com.foyatech.training.model.InputXmlVO;
-import com.foyatech.training.model.OutputXmlVO;
 import com.foyatech.training.tasklet.CsvDataTasklet;
 import com.foyatech.training.tasklet.FixDataTasklet;
 
@@ -70,9 +65,6 @@ public class BatchConfig extends DefaultBatchConfigurer {
 
 	@Value(".${error-file-extension}")
 	private String errExtension;
-	
-	public List<InputXmlVO> inputXml = new ArrayList<InputXmlVO>();
-	public List<OutputXmlVO> outputXml = new ArrayList<OutputXmlVO>();
 
 	/*
 	 * 設置內存數據庫 createJobRepository
@@ -98,28 +90,17 @@ public class BatchConfig extends DefaultBatchConfigurer {
 	@Bean
 	public Job job() {
 		
-		List<Fy_tb_file_cntrl> resultList = null;
 		Set<String> argsNames = shellInput.getOptionNames();
 		log.info("shellInput argsNames : " + argsNames);
+		String[] argsValues = shellInput.getSourceArgs();
+		log.info("shellInput argsValues : " + Arrays.asList(argsValues));
 		String fileType = shellInput.getSourceArgs()[0];
-		log.info("shellInput argsValues : fileType = " + fileType);
-		
-		try {
-			resultList = trainingDao.findPendingData(fileType);			
-		} catch (Exception e) {
-			log.error(ExceptionUtils.getStackTrace(e));
-		}
-
-		if(resultList.size() == 0) {
-			log.info("No data in cntrl table.");
-			log.info("Training2Application end.");
-			System.exit(0);
-		}
+		log.info("fileType : " + fileType);
 		if("CSV".equals(fileType)) {
 			return jobBuilderFactory
 					.get("job")
 					.incrementer(new RunIdIncrementer())
-					.listener(new JobCompletionListener(configFile, fileType))
+					.listener(new JobCompletionListener(configFile, fileType, trainingDao))
 					.flow(step1(fileType, trainingDao))
 					.end()
 					.build();	
@@ -127,13 +108,15 @@ public class BatchConfig extends DefaultBatchConfigurer {
 			return jobBuilderFactory
 					.get("job")
 					.incrementer(new RunIdIncrementer())
-					.listener(new JobCompletionListener(configFile, fileType))
+					.listener(new JobCompletionListener(configFile, fileType, trainingDao))
 					.flow(step2(fileType, trainingDao))
 					.end()
 					.build();
 		}else {
-			return null;
+			log.error(fileType + " 不是正確的格式，請輸入 CSV 或 FIX");
+			System.exit(1);
 		}
+		return null;
 	}
 
 	@Bean

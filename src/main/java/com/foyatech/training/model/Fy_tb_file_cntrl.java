@@ -20,9 +20,5 @@ public class Fy_tb_file_cntrl {
 	private String dscr;
 	private LocalDateTime minTransactionTime;
 	private LocalDateTime maxTransactionTime;
-	private String crUser;
-	private LocalDateTime crDate;
-	private String userStamp;
-	private LocalDateTime dateStamp;
 
 }

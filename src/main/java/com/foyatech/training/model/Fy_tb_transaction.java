@@ -23,13 +23,6 @@ public class Fy_tb_transaction {
 	private BigDecimal price;
 	private BigDecimal unit;
 	private BigDecimal amount;
-	private String crUser;
-	private LocalDateTime crDate;
-	private String userStamp;
-	private LocalDateTime dateStamp;
-
-	// 偷吃步
-	private BigDecimal count;
 
 	private Boolean flag;
 

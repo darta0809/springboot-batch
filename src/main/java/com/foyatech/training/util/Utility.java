@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class Utility {
 	
 	/*
-	 * 當傳入文字長度不足時，左邊補空格
+	 * 當傳入文字長度不足時，左邊補空格 
 	 * */
 	public static String fillSpaceLeft(String s, int len) {
 		return String.format("%1$" + len + "s", s);

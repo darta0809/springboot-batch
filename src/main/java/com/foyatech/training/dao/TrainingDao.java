@@ -35,9 +35,9 @@ public class TrainingDao {
 		log.info(">>>>> find FY_TB_FILE_CNTRL <<<<<");
 		try {
 			List<Fy_tb_file_cntrl> resultList = jdbcTemplate.query(" SELECT * " 
-																	+ " FROM FY_TB_FILE_CNTRL " 
-																	+ " WHERE FILE_TYPE = '" + fileType 
-																	+ "' AND STATUS = 'I' ", BeanPropertyRowMapper.newInstance(Fy_tb_file_cntrl.class));
+										+ " FROM FY_TB_FILE_CNTRL " 
+										+ " WHERE FILE_TYPE = '" + fileType 
+										+ "' AND STATUS = 'I' ", BeanPropertyRowMapper.newInstance(Fy_tb_file_cntrl.class));
 			
 			log.info("Load " + resultList.size() + " recood(s) FROM FY_TB_FILE_CNTRL");
 			

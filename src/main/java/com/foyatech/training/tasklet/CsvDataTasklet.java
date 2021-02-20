@@ -221,7 +221,6 @@ public class CsvDataTasklet implements Tasklet {
 								transactionVo.put("flag", "false"); // 是否寫入錯誤檔 false 不寫入
 							}
 						}
-
 					}
 					// ================================================================================================================
 					// 檢核設定檔 input end

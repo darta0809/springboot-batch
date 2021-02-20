@@ -19,9 +19,9 @@ class Training2ApplicationTests {
 		/*
 		DriverManagerDataSource dataSource=new DriverManagerDataSource(); 
 		dataSource.setDriverClassName("oracle.jdbc.OracleDriver"); 
-		dataSource.setUrl("jdbc:oracle:thin:@10.1.1.205:1521:iotbs");
-		dataSource.setUsername("BT3500"); 
-		dataSource.setPassword("BT3500"); 
+		dataSource.setUrl("jdbc:oracle:thin:@");
+		dataSource.setUsername(""); 
+		dataSource.setPassword(""); 
 		
 		JdbcTemplate jdbcTemplate=new JdbcTemplate(dataSource);
 */

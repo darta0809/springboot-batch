@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+  <!--
+    來源檔格式說明:
+      * input.type 檔案格式
+        * CSV: Comma-Separated-File, 每個欄位以指定分隔符號區隔
+        * FIX: Fixed-Length-File, 每個欄位都有固定的長度
+      * input.delimiter(Optional) input.type=CSV 時, 必須設定此 attribute
+      * column.name 欄位名稱
+      * column.type(Optional, Default=string) 欄位資料格式
+        * string: 字串
+        * number: 數字
+        * timestamp: 日期時間(yyyyMMddHHmmss)
+      * column.length(Optional) input.type=FIX 時, 每個欄位都需要設定此 attribute
+      * column.quoted(Optional, Default=false) 該欄位是否以雙引號包住
+      * column.nullable(Optional, Default=true) 該欄位可否是空值
+  -->
+  <input type="CSV" delimiter=",">
+    <!--
+      Example:[01,2342353453,20200325160900,B050093567,TP0013,L0235,0935765432,"台北市長沙街二段96號3樓","連絡不到收件人時, 請轉交社區管理室, 謝謝",25.068468,30]
+      TRANSACTION_TYPE=01
+      TRANSACTION_SEQ=2342353453
+      TRANSACTION_TIME=20200325160900
+      CUST_ID=B050093567
+      STORE_ID=TP0013
+      PRODUCT_ID=L0235
+      PHONE=0935765432
+      ADDRESS=台北市長沙街二段96號3樓
+      MEMO=連絡不到收件人時, 請轉交社區管理室, 謝謝
+      PRICE=25.068468
+      UNIT=30
+    -->
+    <column name="TRANSACTION_TYPE" type="string" quoted="false" nullable="false"/>
+    <column name="TRANSACTION_SEQ" type="number" quoted="false" nullable="false"/>
+    <column name="TRANSACTION_TIME" type="timestamp" quoted="false" nullable="false"/>
+    <column name="CUST_ID" type="string" quoted="false" nullable="false"/>
+    <column name="STORE_ID" type="string" quoted="false" nullable="false"/>
+    <column name="PRODUCT_ID" type="string" quoted="false" nullable="false"/>
+    <column name="PHONE" type="string" quoted="false" nullable="false"/>
+    <column name="ADDRESS" type="string" quoted="true" nullable="false"/>
+    <column name="MEMO" type="string" quoted="true" nullable="true"/>
+    <column name="PRICE" type="number" quoted="false" nullable="false"/>
+    <column name="UNIT" type="number" quoted="false" nullable="false"/>
+  </input>
+
+  <!--
+    產出檔格式說明:
+      * 找不到 <output> element 表示不需要產出檔案
+      * output.type 檔案格式
+        * CSV: Comma-Separated-File, 每個欄位以指定分隔符號區隔
+        * FIX: Fixed-Length-File, 每個欄位都有固定的長度
+      * output.delimiter(Optional) output.type=CSV 時, 必須設定此 attribute
+      * column.name 欄位名稱
+      * column.type(Optional, Default=string) 欄位資料格式
+        * string: 字串
+        * number: 數字
+        * timestamp: 日期時間(yyyyMMddHHmmss)
+      * column.length(Optional) output.type=FIX 時, 每個欄位都需要設定此 attribute
+      * column.quoted(Optional, Default=false) 該欄位是否以雙引號包住
+      * column.value
+        * 空值 ==> 不需要產出任何資料
+        * ${FILE_TYPE} ==> command line argument: file-type
+        * ${FILE_SEQ} ==> FY_TB_FILE_CNTRL.FILE_SEQ
+        * ${FILENAME} ==> FY_TB_FILE_CNTRL.FILENAME
+        * ${AMOUNT} ==> 每筆資料的 PRICE*UNIT 後的結果
+        * 其他 ==> 比對 input.column.name 並取出該欄位的值
+  -->
+  <output type="FIX">
+    <!-- Example:Example:[01234235345320200325160900B050093567TP0013    L0235     0935765432          台北市長沙街二段96號3樓                                     連絡不到收件人時, 請轉交社區管理室, 謝謝                            25.068468           30        ] -->
+    <column name="TRANSACTION_TYPE" type="string" length="2" value="TRANSACTION_TYPE"/>
+    <column name="TRANSACTION_SEQ" type="number" length="10" value="TRANSACTION_SEQ"/>
+    <column name="TRANSACTION_TIME" type="timestamp" length="14" value="TRANSACTION_TIME"/>
+    <column name="CUST_ID" type="string" length="10" value="CUST_ID"/>
+    <column name="STORE_ID" type="string" length="10" value="STORE_ID"/>
+    <column name="PRODUCT_ID" type="string" length="10" value="PRODUCT_ID"/>
+    <column name="PHONE" type="string" length="20" value="PHONE"/>
+    <column name="ADDRESS" type="string" length="50" value="ADDRESS"/>
+    <column name="MEMO" type="string" length="50" value="MEMO"/>
+    <column name="PRICE" type="number" length="20" value="PRICE"/>
+    <column name="UNIT" type="number" length="10" value="UNIT"/>
+  </output>
+
+  <!--
+    Insert table 說明:
+      * 找不到 <table> element 表示不需要 insert, 若有多組 <table> 則每個 table 都必須 insert
+      * table.name 資料將被 insert 至此 table 中
+      * column.name 欄位名稱
+      * column.type(Optional, Default=string) 欄位資料格式
+        * string: 字串
+        * number: 數字
+        * timestamp: 日期時間(YYYYMMDDHH24MISS)
+      * column.value
+        * 空值 ==> insert null
+        * ${FILE_TYPE} ==> command line argument: file-type
+        * ${FILE_SEQ} ==> FY_TB_FILE_CNTRL.FILE_SEQ
+        * ${FILENAME} ==> FY_TB_FILE_CNTRL.FILENAME
+        * ${AMOUNT} ==> 每筆資料的 PRICE*UNIT 後的結果
+        * 其他 ==> 比對 input.column.name 並取出該欄位的值
+  -->
+  <table name="FY_TB_TRANSACTION">
+    <column name="FILE_TYPE" type="string" value="${FILE_TYPE}"/>
+    <column name="FILE_SEQ" type="number" value="${FILE_SEQ}"/>
+    <column name="FILENAME" type="string" value="${FILENAME}"/>
+    <column name="TRANSACTION_TYPE" type="string" value="TRANSACTION_TYPE"/>
+    <column name="TRANSACTION_SEQ" type="number" value="TRANSACTION_SEQ"/>
+    <column name="TRANSACTION_TIME" type="timestamp" value="TRANSACTION_TIME"/>
+    <column name="CUST_ID" type="string" value="CUST_ID"/>
+    <column name="STORE_ID" type="string" value="STORE_ID"/>
+    <column name="PRODUCT_ID" type="string" value="PRODUCT_ID"/>
+    <column name="PHONE" type="string" value="PHONE"/>
+    <column name="ADDRESS" type="string" value="ADDRESS"/>
+    <column name="MEMO" type="string" value="MEMO"/>
+    <column name="PRICE" type="number" value="PRICE"/>
+    <column name="UNIT" type="number" value="UNIT"/>
+    <column name="AMOUNT" type="number" value="${AMOUNT}"/>
+  </table>
+</root>

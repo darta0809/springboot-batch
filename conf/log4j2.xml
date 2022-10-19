@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 《 monitorInterval="30"作用：30秒進行一次掃描該配置檔案，重新載入一次，不需要重啟專案》 -->
+<Configuration status="WARN" monitorInterval="30">
+
+  <Properties>
+    <!-- 配置日誌檔案輸出目錄此處定義了變數，後面就可以使用${LOG_HOME}進行引用了 -->
+    <Property name="LOG_HOME">C:/Shoalter/log/</Property>
+
+    <Property name="LOG_PATTERN">
+      [%d{yyyy/MM/dd HH:mm:ss:SSS}][%p][%C-%M()]: %m%n
+    </Property>
+  </Properties>
+
+  <Appenders>
+    <!-- 輸出值控制檯 -->
+    <Console name="Console" target="SYSTEM_OUT">
+      <!-- 控制台只輸出level及以上级别的信息(onMatch),其他的直接拒絕(onMismatch) . -->
+      <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+      <!-- 格式化日誌 -->
+      <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+    </Console>
+
+    <Console name="console_err_appender" target="SYSTEM_ERR">
+      <!-- 控制台只輸出error级别的信息到System.err,顯示紅色文字 -->
+      <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY" />
+      <!-- 格式化日誌 -->
+      <PatternLayout pattern="${LOG_PATTERN}" charset="UTF-8" />
+    </Console>
+
+    <!-- Rolling File Appender -->
+    <RollingFile name="DailyRollingFile"
+      fileName="${LOG_HOME}/Training_2.log"
+      filePattern="${LOG_HOME}/Training_2%d{yyyy-MM-dd}.log">
+      <PatternLayout pattern="[%d] ### %p ### %n   [%C-%M()] %m%n" />
+      <Filters>
+        <!-- 只記錄ERROR級別日誌訊息，程式印出的其他訊息不會被記錄 -->
+        <!-- 此level設置的日誌級別，是過濾日誌文件中印出的日誌訊息，和Root的level有所區別 -->
+        <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY" />
+      </Filters>
+      <Policies>
+        <!-- 每天創建一個日誌文件 -->
+        <TimeBasedTriggeringPolicy interval="1" />
+        <SizeBasedTriggeringPolicy size="10 MB" />
+      </Policies>
+      <DefaultRolloverStrategy max="10" />
+    </RollingFile>
+
+  </Appenders>
+
+  <Loggers>
+
+    <!-- 自定義時需要指定每個Logger的名稱name（對於命名可以以包名作為日誌的名字，不同的包配置不同的級別等）。 -->
+    <!--
+        <Logger name="com.foyatech"
+          level="debug" additivity="false">
+          <AppenderRef ref="ConsoleAppender" />
+          <AppenderRef ref="FileAppender" />
+        </Logger>
+    -->
+
+    <!-- AsyncRoot - 異步紀錄日至 - 需要LMAXDisruptor的支持 -->
+    <!--
+        <AsyncRoot level="info" additivity="false">
+          <AppenderRef ref="Console" />
+          <AppenderRef ref="FileAppender" />
+        </AsyncRoot>
+    -->
+
+    <!-- 用來指定項目的根日誌，如果沒有單獨指定Logger，那麼就會默認使用該Root日誌輸出 -->
+    <Root level="INFO">
+      <AppenderRef ref="Console" />
+      <AppenderRef ref="DailyRollingFile" />
+    </Root>
+
+  </Loggers>
+</Configuration>

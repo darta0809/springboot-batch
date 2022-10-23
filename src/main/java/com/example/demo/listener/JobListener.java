@@ -2,6 +2,7 @@ package com.example.demo.listener;
 
 import com.example.demo.model.Root;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import lombok.SneakyThrows;
@@ -24,8 +25,8 @@ public class JobListener extends JobExecutionListenerSupport {
 
     log.info("BATCH JOB STARTED SUCCESSFULLY");
 
-    InputStream in = new FileInputStream("C:/Users/vincent.ta/IdeaProjects/demo/conf/csv2fix.xml");
-    Root root = new XmlMapper().readValue(in, Root.class);
+    InputStream in = new FileInputStream("C:/Intellij_workspace/springbootbatch/conf/csv2fix.xml");
+    Root root = new XmlMapper().registerModule(new JavaTimeModule()).readValue(in, Root.class);
 
     jobExecution.getExecutionContext().put("root", root);
   }

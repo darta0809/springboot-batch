@@ -20,7 +20,7 @@ public class DemoApplication {
   JobLauncher jobLauncher;
   @Autowired
   Job job;
-  @Value("${batch.runOnce:false}")
+  @Value("${batch.runOnce:true}")
   boolean runOnce;
 
   public static void main(String[] args) {

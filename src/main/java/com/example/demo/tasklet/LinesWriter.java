@@ -39,6 +39,7 @@ public class LinesWriter implements Tasklet, StepExecutionListener {
     fileInfoRepository.saveAll(fileInfoEntity);
 
     File file = new File("C:/Intellij_workspace/springbootbatch/output/data.fix");
+
     FileUtils.writeLines(file, lines);
 
     return RepeatStatus.FINISHED;

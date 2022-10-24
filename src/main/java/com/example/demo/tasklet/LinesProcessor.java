@@ -31,8 +31,9 @@ public class LinesProcessor implements Tasklet, StepExecutionListener {
   @Override
   public RepeatStatus execute(StepContribution stepContribution, ChunkContext chunkContext)
           throws Exception {
-    FileInfoEntity fileInfo = new FileInfoEntity();
+
     lines.forEach(info -> {
+      FileInfoEntity fileInfo = new FileInfoEntity();
       fileInfo.setTransactionType(info.getTransactionType().strip());
       fileInfo.setTransactionSeq(info.getTransactionSeq());
       fileInfo.setTransactionTime(Util.parseDateTime(info.getTransactionTime().strip()));

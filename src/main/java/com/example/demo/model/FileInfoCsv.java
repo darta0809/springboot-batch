@@ -1,18 +1,19 @@
 package com.example.demo.model;
 
 import com.opencsv.bean.CsvBindByName;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
-public class FileInfoCsv {
+public class FileInfoCsv implements Serializable {
 
     @CsvBindByName(column = "TRANSACTION_TYPE")
     private String transactionType;
 
     @CsvBindByName(column = "TRANSACTION_SEQ")
     private Integer transactionSeq;
-    
+
     @CsvBindByName(column = "TRANSACTION_TIME")
     private String transactionTime;
 

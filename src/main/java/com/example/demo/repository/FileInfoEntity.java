@@ -1,13 +1,13 @@
 package com.example.demo.repository;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -20,10 +20,11 @@ import org.hibernate.Hibernate;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "FILE_INFO")
-public class FileInfoEntity implements Serializable {
+public class FileInfoEntity {
 
     @Id
     @Column(name = "ID", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "TRANSACTION_TYPE")
@@ -33,6 +34,8 @@ public class FileInfoEntity implements Serializable {
     private Integer transactionSeq;
 
     @Column(name = "TRANSACTION_TIME")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime transactionTime;
 
     @Column(name = "CUST_ID")
